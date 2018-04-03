@@ -19,6 +19,10 @@
 
 // system include files
 #include <memory>
+#include <iostream>
+
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -72,6 +76,7 @@ class reco_analyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 // constructors and destructor
 //
 reco_analyzer::reco_analyzer(const edm::ParameterSet& iConfig):
+//generalTracksToken(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("generalTracks")))
 generalTracksToken(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("generalTracks")))
 {
    //now do what ever initialization is needed
@@ -107,8 +112,57 @@ reco_analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //EDGetTokenT<reco::TrackCollection>   track_token;
    //track_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks", "", "RECO")));
    //track_token(consumes<reco::TrackCollection>("generalTracks"));
-   Handle<reco::TrackCollection> tracks;
-   iEvent.getByToken(generalTracksToken, tracks);
+  Handle<reco::TrackCollection> tracks;
+  iEvent.getByToken(generalTracksToken, tracks);
+
+  //LogInfo("Demo") << "number of tracks "<<tracks->size();
+
+  for(size_t i=0; i<tracks->size();i++){
+      //LogInfo("Demo") << "Pt of muon "<<  (*tracks)[i].pt();
+
+      std::cout << "inner position  " << (*tracks)[i].innerPosition().x() << std::endl;
+      std::cout << "outer position  " << (*tracks)[i].outerPosition().z() << std::endl;
+
+      
+
+      for (trackingRecHit_iterator hit = (*tracks)[i].recHitsBegin(); hit != (*tracks)[i].recHitsEnd(); ++hit) {
+        //LogInfo("Demo") << "hit "<< (*hit)->localPosition().x();
+
+        DetId hitId  = (*hit)->geographicalId();
+
+        if ( hitId.det() == DetId::Tracker ) {
+          //LogInfo("Demo") << "hit in Tracker";
+          std::cout << "hit in Tracker" << std::endl;
+
+
+
+
+      /*  if (hitId.subdetId() == StripSubdetector::TIB ) {
+         const StripSubdetector chamberId(hitId.rawId());
+         std::cout << "Tracker Hit in TIB SubDetector" << chamberId.SubDetector() << " order " << chamberId.order() << " side " << chamberId.side() << "." << std::endl;
+        } */
+
+
+
+        }
+        if ( hitId.subdetId() == MuonSubdetId::DT  ) {
+          //LogInfo("Demo") << "hit in DT";
+          std::cout << "hit in DT" << std::endl;
+        }
+
+        if ( hitId.subdetId() == MuonSubdetId::CSC ) {
+          //LogInfo("Demo") << "hit in CSC";
+          std::cout << "hit in CSC" << std::endl;
+        }
+
+        std::cout << "hit location " << (*hit)->localPosition().x() << std::endl;
+
+
+      }
+
+
+    }
+
 
 
 
